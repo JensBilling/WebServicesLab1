@@ -18,15 +18,15 @@ public class Main {
 
         ExecutorService executorService = Executors.newCachedThreadPool();
 
-        try (ServerSocket serverSocket = new ServerSocket(80)){
-            Socket client = serverSocket.accept();
-            executorService.submit(() -> handleConnection(client));
+        try (ServerSocket serverSocket = new ServerSocket(80)) {
 
+            while (true) {
+                Socket client = serverSocket.accept();
+                executorService.submit(() -> handleConnection(client));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private static void handleConnection(Socket client) {
@@ -37,16 +37,23 @@ public class Main {
 
             OutputStream clientOutput = client.getOutputStream();
 
-            sendJsonResponse(clientOutput);
 
+            if (url.equals("/f1")) {
+
+                sendf1JsonResponse(clientOutput);
+            }
+
+
+            clientInput.close();
+            clientOutput.close();
+            client.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    private static void sendJsonResponse(OutputStream clientOutput) throws IOException {
+    private static void sendf1JsonResponse(OutputStream clientOutput) throws IOException {
 
         List<Formula1Driver> listOfDrivers = new ArrayList<>();
         listOfDrivers.add(new Formula1Driver("Lewis Hamilton", 35, true));
@@ -63,6 +70,7 @@ public class Main {
 
         clientOutput.write(headerData);
         clientOutput.write(jsonData);
+        clientOutput.flush();
 
 
     }
@@ -72,10 +80,10 @@ public class Main {
         while (true) {
             String line = clientInput.readLine();
 
-            if  (line.startsWith("GET")) {
+            if (line.startsWith("GET")) {
                 url = line.split(" ")[1];
             }
-            if (line == null || line.isEmpty()){
+            if (line == null || line.isEmpty()) {
                 break;
             }
         }
