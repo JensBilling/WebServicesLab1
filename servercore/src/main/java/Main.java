@@ -35,10 +35,11 @@ public class Main {
 
             OutputStream outputToClient = client.getOutputStream();
 
-            // Respond to client with correct output
-            sendFileToClient(request, outputToClient);
-
-
+            if (request.getType().equals("GET") || request.getType().equals("HEAD")) {
+                sendFileToClient(request, outputToClient);
+            } else if (request.getType().equals("POST")){
+                saveUserToDatabase(request);
+            }
 
             clientInput.close();
             outputToClient.close();
@@ -47,6 +48,16 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void saveUserToDatabase(RequestObject request) {
+        Gson gson = new Gson();
+        ServerUser userObject = gson.fromJson(request.getBody(), ServerUser.class);
+
+        // print json-to-gson object's name and pw, just to prove it works
+        System.out.println(userObject.getUsername());
+        System.out.println(userObject.getPassword());
+
     }
 
     private static void sendFileToClient(RequestObject request, OutputStream clientOutput) throws IOException {
@@ -71,10 +82,10 @@ public class Main {
             }
 
         }
-        if (request.getType().equals("HEAD")){
+        if (request.getType().equals("HEAD")) {
             clientOutput.write(header.getBytes());
             clientOutput.flush();
-        }else if(request.getType().equals("GET")){
+        } else if (request.getType().equals("GET")) {
             clientOutput.write(header.getBytes());
             clientOutput.write(data);
             clientOutput.flush();
@@ -108,28 +119,55 @@ public class Main {
     }
 
     private static RequestObject readRequest(BufferedReader clientInput) throws IOException {
-        // Perhaps bodgy initialize of request
         RequestObject request = new RequestObject("", "");
-        while (true) {
-            String line = clientInput.readLine();
+        List<Integer> rawRequestAsciiData = new ArrayList<>();
 
-            if (line.startsWith("GET")) {
-                String url = line.split(" ")[1];
-                request = RequestManagement.getManager(url);
-
-            } else if (line.startsWith("HEAD")) {
-                String url = line.split(" ")[1];
-                request = RequestManagement.headManager(url);
-            } else if (line.startsWith("POST")) {
-                String url = line.split(" ")[1];
-                request = RequestManagement.postManager(url);
-            }
-
-            if (line == null || line.isEmpty()) {
-
-                break;
+        boolean loop = true;
+        while (loop) {
+            int x = clientInput.read();
+            rawRequestAsciiData.add(x);
+            if (x == 125) {
+                loop = false;
             }
         }
+
+        String requestDataString = "";
+        for (int i = 0; i < rawRequestAsciiData.size(); i++) {
+            requestDataString += Character.toString(rawRequestAsciiData.get(i));
+        }
+
+        String[] requestArray = requestDataString.split("\r\n");
+
+        String line1 = requestArray[0];
+        String contentType = "";
+        String contentLength = "";
+        String[] requestBodyArray = requestDataString.split("\r\n\r\n");
+        String requestBody = requestBodyArray[1];
+
+        for (int i = 0; i < requestArray.length; i++) {
+
+            if (requestArray[i].contains("Content-Type:")) {
+                String[] stringSplit = requestArray[i].split(" ");
+                contentType = stringSplit[1];
+            }
+            if (requestArray[i].contains("Content-Length:")) {
+                String[] stringSplit = requestArray[i].split(" ");
+                contentLength = stringSplit[1];
+            }
+        }
+
+        if (line1.startsWith("GET")) {
+            String url = line1.split(" ")[1];
+            request = RequestManagement.getManager(url);
+        } else if (line1.startsWith("HEAD")) {
+            String url = line1.split(" ")[1];
+            request = RequestManagement.headManager(url);
+        } else if (line1.startsWith("POST")) {
+            String url = line1.split(" ")[1];
+            request = RequestManagement.postManager(url, contentType, contentLength, requestBody);
+        }
+
         return request;
     }
+
 }

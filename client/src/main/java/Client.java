@@ -1,11 +1,35 @@
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
+
+    static Scanner sc = new Scanner(System.in);
+
     public static void main(String[] args) {
+
+
+        System.out.println("---What do you want to do?---");
+        System.out.println("---1. Create new user---");
+        System.out.println("---2. Log in---");
+        int menuChoice = sc.nextInt();
+        sc.nextLine();
+
+        switch (menuChoice) {
+            case 1:
+                //post request to send user data via json
+                createAndUploadNewUser();
+                break;
+            case 2:
+                //post request to send user data via json
+                //signInExistingUser();
+                break;
+        }
 
 
         try {
@@ -37,6 +61,23 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
+    }
+
+    private static void createAndUploadNewUser() {
+        System.out.println("---Enter username---");
+        String username = sc.nextLine();
+        System.out.println("---Enter password---");
+        String password = sc.nextLine();
+
+        ClientUser newUser = new ClientUser(username, password);
+
+        Gson gson = new Gson();
+
+        // Convert user information to Json
+        String toJson = gson.toJson(newUser);
+
 
 
     }
