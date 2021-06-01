@@ -39,12 +39,6 @@ public class Main {
             sendFileToClient(request, outputToClient);
 
 
-            // Dummy json respons
-//            if (request.equals("/f1")) {
-//
-//                sendf1JsonResponse(clientOutput);
-//            }
-
 
             clientInput.close();
             outputToClient.close();

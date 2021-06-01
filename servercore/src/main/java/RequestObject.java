@@ -1,7 +1,11 @@
 public class RequestObject {
-    private String type;
-    private String url;
-    // add parameters when needed
+    String type;
+    String url;
+
+    public void setType(String type) {
+        this.type = type;
+    }
+// add parameters when needed
 
     public RequestObject(String type, String url) {
         this.type = type;
