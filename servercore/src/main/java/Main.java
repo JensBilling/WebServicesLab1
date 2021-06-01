@@ -71,10 +71,17 @@ public class Main {
             }
 
         }
+        if (request.getType().equals("HEAD")){
+            clientOutput.write(header.getBytes());
+            clientOutput.flush();
+        }else if(request.getType().equals("GET")){
+            clientOutput.write(header.getBytes());
+            clientOutput.write(data);
+            clientOutput.flush();
 
-        clientOutput.write(header.getBytes());
-        clientOutput.write(data);
-        clientOutput.flush();
+        }
+
+
     }
 
 
