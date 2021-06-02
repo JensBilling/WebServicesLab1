@@ -1,4 +1,6 @@
 import com.google.gson.Gson;
+import dao.ServerUserFunctions;
+import serverusers.ServerUser;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -53,10 +55,8 @@ public class Main {
     private static void saveUserToDatabase(RequestObject request) {
         Gson gson = new Gson();
         ServerUser userObject = gson.fromJson(request.getBody(), ServerUser.class);
+        ServerUserFunctions.addNewUser(userObject.getUsername(), userObject.getPassword());
 
-        // print json-to-gson object's name and pw, just to prove it works
-        System.out.println(userObject.getUsername());
-        System.out.println(userObject.getPassword());
 
     }
 
