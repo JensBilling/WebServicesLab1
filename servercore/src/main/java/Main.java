@@ -40,7 +40,7 @@ public class Main {
             if (request.getType().equals("GET") || request.getType().equals("HEAD")) {
                 sendFileToClient(request, outputToClient);
             } else if (request.getType().equals("POST")){
-                saveUserToDatabase(request);
+                saveUserToDatabase(request, outputToClient);
             }
 
             clientInput.close();
@@ -52,12 +52,21 @@ public class Main {
         }
     }
 
-    private static void saveUserToDatabase(RequestObject request) {
+    private static void saveUserToDatabase(RequestObject request, OutputStream clientOutput) throws IOException {
+
         Gson gson = new Gson();
         ServerUser userObject = gson.fromJson(request.getBody(), ServerUser.class);
         ServerUserFunctions.addNewUser(userObject.getUsername(), userObject.getPassword());
 
+        String userCreationResponse = userObject.getUsername() + " account was successfully created";
+        byte[] responseBody = userCreationResponse.getBytes(StandardCharsets.UTF_8);
 
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: " + responseBody.length + "\r\n\r\n";
+        byte[] headerData = header.getBytes();
+
+        clientOutput.write(headerData);
+        clientOutput.write(responseBody);
+        clientOutput.flush();
     }
 
     private static void sendFileToClient(RequestObject request, OutputStream clientOutput) throws IOException {
