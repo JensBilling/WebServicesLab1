@@ -55,6 +55,8 @@ public class Client {
 
             output.print("POST / HTTP/1.1\r\n");
             output.print("Host: localhost\r\n");
+            output.print("Content-Type: application/json\r\n");
+            output.print("Content-Length: " + toJson.length() + "\r\n");
             output.print("\r\n");
             output.print(toJson);
             output.flush();

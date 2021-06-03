@@ -40,7 +40,6 @@ public class Main {
             if (request.getType().equals("GET") || request.getType().equals("HEAD")) {
 
                 if (request.getUrl().contains("/create")) {
-
                     saveUserToDatabaseFromUrl(request, outputToClient);
 
 
@@ -153,46 +152,40 @@ public class Main {
         clientOutput.write(headerData);
         clientOutput.write(jsonData);
         clientOutput.flush();
-
-
     }
 
     private static RequestObject readRequest(BufferedReader clientInput) throws IOException {
         RequestObject request = new RequestObject("", "");
-        List<Integer> rawRequestAsciiData = new ArrayList<>();
 
-        boolean loop = true;
-        while (loop) {
-            int x = clientInput.read();
-            rawRequestAsciiData.add(x);
-            if (x == 125) {
-                loop = false;
-            }
-        }
-
-        String requestDataString = "";
-        for (int i = 0; i < rawRequestAsciiData.size(); i++) {
-            requestDataString += Character.toString(rawRequestAsciiData.get(i));
-        }
-
-        String[] requestArray = requestDataString.split("\r\n");
-
-        String line1 = requestArray[0];
+        int contentLength = 0;
+        // contentLengthString is useless
+        String contentLengthString = "";
         String contentType = "";
-        String contentLength = "";
-        String[] requestBodyArray = requestDataString.split("\r\n\r\n");
-        String requestBody = requestBodyArray[1];
+        String line1 = "";
 
-        for (int i = 0; i < requestArray.length; i++) {
+        while (true) {
+            String line = clientInput.readLine();
+            if (line == null || line.isEmpty()) {
+                break;
+            }
+            if (line.contains("HTTP/1.1")) {
+                line1 = line;
+            }
+            if (line.contains("Content-Length:")) {
+                String[] splitLine = line.split(" ");
+                contentLengthString = splitLine[1];
+                contentLength = Integer.parseInt(splitLine[1]);
+            }
+            if (line.contains("Content-Type:")) {
+                String[] splitLine = line.split(" ");
+                contentType = splitLine[1];
+            }
+        }
 
-            if (requestArray[i].contains("Content-Type:")) {
-                String[] stringSplit = requestArray[i].split(" ");
-                contentType = stringSplit[1];
-            }
-            if (requestArray[i].contains("Content-Length:")) {
-                String[] stringSplit = requestArray[i].split(" ");
-                contentLength = stringSplit[1];
-            }
+        String responseBody = "";
+        for (int i = 0; i < contentLength; i++) {
+            int asciiInt = clientInput.read();
+            responseBody += Character.toString(asciiInt);
         }
 
         if (line1.startsWith("GET")) {
@@ -203,7 +196,7 @@ public class Main {
             request = RequestManagement.headManager(url);
         } else if (line1.startsWith("POST")) {
             String url = line1.split(" ")[1];
-            request = RequestManagement.postManager(url, contentType, contentLength, requestBody);
+            request = RequestManagement.postManager(url, contentType, contentLengthString, responseBody);
         }
 
         return request;
