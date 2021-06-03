@@ -38,8 +38,19 @@ public class Main {
             OutputStream outputToClient = client.getOutputStream();
 
             if (request.getType().equals("GET") || request.getType().equals("HEAD")) {
-                sendFileToClient(request, outputToClient);
-            } else if (request.getType().equals("POST")){
+
+                if (request.getUrl().contains("/create")) {
+
+                    saveUserToDatabaseFromUrl(request, outputToClient);
+
+
+                } else {
+                    sendFileToClient(request, outputToClient);
+
+                }
+
+
+            } else if (request.getType().equals("POST")) {
                 saveUserToDatabase(request, outputToClient);
             }
 
@@ -50,6 +61,25 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void saveUserToDatabaseFromUrl(RequestObject request, OutputStream clientOutput) throws IOException {
+        String username = request.getUrlParameters().get("username");
+        String password = request.getUrlParameters().get("password");
+
+        ServerUser userObject = new ServerUser(username, password);
+        ServerUserFunctions.addNewUser(userObject.getUsername(), userObject.getPassword());
+        String userCreationResponse = userObject.getUsername() + " account was successfully created";
+        byte[] responseBody = userCreationResponse.getBytes(StandardCharsets.UTF_8);
+
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: " + responseBody.length + "\r\n\r\n";
+        byte[] headerData = header.getBytes();
+
+        clientOutput.write(headerData);
+        clientOutput.write(responseBody);
+        clientOutput.flush();
+
+
     }
 
     private static void saveUserToDatabase(RequestObject request, OutputStream clientOutput) throws IOException {
@@ -108,7 +138,7 @@ public class Main {
     private static void sendf1JsonResponse(OutputStream clientOutput) throws IOException {
 
         List<Formula1Driver> listOfDrivers = new ArrayList<>();
-        listOfDrivers.add(new Formula1Driver("Lewis Hamilton", 35, true));
+        listOfDrivers.add(new Formula1Driver("Lewis Hamiltodn", 35, true));
         listOfDrivers.add(new Formula1Driver("Ayrton Senna", 70, false));
         listOfDrivers.add(new Formula1Driver("Nikita Mazepin", 21, true));
 
