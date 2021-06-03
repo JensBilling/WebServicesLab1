@@ -21,6 +21,5 @@ public class ServerUserDao {
 
         System.out.println(username + " added to database");
 
-
     }
 }

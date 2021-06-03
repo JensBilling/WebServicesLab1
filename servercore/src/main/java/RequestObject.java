@@ -9,9 +9,6 @@ public class RequestObject {
     String contentLength;
     Map<String, String> urlParameters = new HashMap<>();
 
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public RequestObject(String type, String url) {
         this.type = type;
@@ -54,5 +51,9 @@ public class RequestObject {
 
     public String getContentLength() {
         return contentLength;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -12,26 +12,20 @@ public class Client {
     static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-
-
         System.out.println("---What do you want to do?---");
         System.out.println("---1. Create new user---");
-        System.out.println("---2. Log in---");
+        System.out.println("---2. Retrieve user---");
         int menuChoice = sc.nextInt();
         sc.nextLine();
 
         switch (menuChoice) {
             case 1:
-                //post request to send user data via json
                 createAndUploadNewUser();
                 break;
             case 2:
-                //post request to send user data via json
-                //signInExistingUser();
+                //post retrieve user methodthing
                 break;
         }
-
-
     }
 
     private static void createAndUploadNewUser() {
@@ -43,14 +37,10 @@ public class Client {
         ClientUser newUser = new ClientUser(username, password);
 
         Gson gson = new Gson();
-
-        // Convert user information to Json
         String toJson = gson.toJson(newUser);
 
         try {
             Socket socket = new Socket("localhost", 80);
-
-
             PrintWriter output = new PrintWriter(socket.getOutputStream());
 
             output.print("POST / HTTP/1.1\r\n");
@@ -70,7 +60,7 @@ public class Client {
                     break;
                 }
                 System.out.println(line);
-                if (line.contains("Content-length:")){
+                if (line.contains("Content-length:")) {
                     String[] splitLine = line.split(" ");
                     contentLength = Integer.parseInt(splitLine[1]);
                 }
@@ -83,16 +73,13 @@ public class Client {
             }
 
             System.out.println(responseBody);
-
             inputFromServer.close();
             output.close();
             socket.close();
 
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 }
 

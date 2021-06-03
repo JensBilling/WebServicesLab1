@@ -12,8 +12,6 @@ public class RequestManagement {
             String[] splitUrl = url.split("\\?");
             url = splitUrl[0];
             parameters = splitUrl[1];
-
-
         }
 
         if (url.equals("/")) {
@@ -26,17 +24,13 @@ public class RequestManagement {
                 String key = keyValueSplit[0];
                 String value = keyValueSplit[1];
                 queryStringMap.put(key, value);
-
             }
-
             return new RequestObject("GET", url, queryStringMap);
-
 
         } else {
             return new RequestObject("GET", "servercore/src/main/resources" + url);
         }
     }
-
 
     public static RequestObject headManager(String url) {
         if (url.equals("/")) {
@@ -49,7 +43,6 @@ public class RequestManagement {
     public static RequestObject postManager(String url, String contentType, String contentLength, String requestBody) {
 
         return new RequestObject("POST", "servercore/src/main/resources" + url, requestBody, contentType, contentLength);
-
     }
 
 }
