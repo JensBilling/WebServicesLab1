@@ -26,7 +26,12 @@ public class RequestManagement {
                 queryStringMap.put(key, value);
             }
             return new RequestObject("GET", url, queryStringMap);
+        } else if (url.equals("/getuser")){
+            String[] splitParameters = parameters.split("=");
+            Map<String, String> queryStringMap = new HashMap<>();
+            queryStringMap.put(splitParameters[0], splitParameters[1]);
 
+            return new RequestObject("GET", url, queryStringMap);
         } else {
             return new RequestObject("GET", "servercore/src/main/resources" + url);
         }

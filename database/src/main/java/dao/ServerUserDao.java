@@ -5,6 +5,7 @@ import serverusers.ServerUser;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.io.OutputStream;
 
 public class ServerUserDao {
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("PU");
@@ -21,5 +22,13 @@ public class ServerUserDao {
 
         System.out.println(username + " added to database");
 
+    }
+
+    public ServerUser retrieveUserFromDatabase(int userId) {
+        EntityManager em = emf.createEntityManager();
+
+        ServerUser su = em.find(ServerUser.class, userId);
+
+        return su;
     }
 }

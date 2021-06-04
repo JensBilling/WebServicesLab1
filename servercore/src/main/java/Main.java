@@ -37,6 +37,8 @@ public class Main {
 
                 if (request.getUrl().contains("/create")) {
                     saveUserToDatabaseFromUrl(request, outputToClient);
+                } else if (request.getUrl().contains("/getuser")) {
+                    retrieveUserFromDatabase(request, outputToClient);
                 } else {
                     sendFileToClient(request, outputToClient);
                 }
@@ -52,6 +54,23 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void retrieveUserFromDatabase(RequestObject request, OutputStream outputToClient) throws IOException {
+        String stringUserId = request.getUrlParameters().get("id");
+        int userId = Integer.parseInt(stringUserId);
+        ServerUser su = ServerUserFunctions.retrieveUserFromDatabase(userId);
+
+        Gson gson = new Gson();
+        String userInformationResponse = gson.toJson(su);
+        byte[] responseBody = userInformationResponse.getBytes(StandardCharsets.UTF_8);
+
+        String header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-length: " + responseBody.length + "\r\n\r\n";
+        byte[] headerData = header.getBytes(StandardCharsets.UTF_8);
+
+        outputToClient.write(headerData);
+        outputToClient.write(responseBody);
+        outputToClient.flush();
     }
 
     private static void saveUserToDatabaseFromUrl(RequestObject request, OutputStream clientOutput) throws IOException {
@@ -92,6 +111,7 @@ public class Main {
         } else {
             try (FileInputStream fileInputStream = new FileInputStream(f)) {
                 data = new byte[(int) f.length()];
+                // Vad gör fileInputStream?
                 fileInputStream.read(data);
                 var contentType = Files.probeContentType(f.toPath());
                 header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
