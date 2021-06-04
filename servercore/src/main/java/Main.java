@@ -113,8 +113,13 @@ public class Main {
                 data = new byte[(int) f.length()];
                 // Vad gör fileInputStream?
                 fileInputStream.read(data);
-                var contentType = Files.probeContentType(f.toPath());
+                String contentType = Files.probeContentType(f.toPath());
+
+                if (request.getUrl().contains(".js"))
+                    contentType = "application/javascript";
+
                 header = "HTTP/1.1 200 OK\r\nContent-Type: " + contentType + "\r\nContent-length: " + data.length + "\r\n\r\n";
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
